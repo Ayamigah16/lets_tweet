@@ -11,28 +11,87 @@
     </div>
 </div>
 
+<div class="row mb-3">
+    <div class="col-md-4 mx-auto col-10">
+        <form class="form" id="tweet-create-form" method="POST" action="/create-tweet">
+            {% csrf_token %}
+            <input type="hidden" value="/" name="next">
+            <textarea class="form-control" name="content" id="" placeholder="Your tweet"></textarea>
+            <button type="submit" class="btn btn-primary m-2">Tweet</button>
+        </form>
+    </div>
+</div>
+
+
+
 <div class="row" id="tweets">
-    Loading....
+
 </div>
 
 
 
 
 <script>
-    const tweetsElement = document.getElementById('tweets')
-    tweetsElement.innerHTML = "Loading....."
+    function handleTweetCreateFormDidSubmit(event) {
+        event.preventDefault()
+            //console.log(event)
+        var myForm = event.target
+        const myFormData = new FormData(myForm)
+        const url = myForm.getAttribute("action")
+        const method = myForm.getAttribute("method")
 
-    var el1 = "<h1>Hi there 1</h1>"
-    var el2 = "<h1>Hi there 2</h1>"
-    var el3 = "<h1>Hi there 3</h1>"
+        const xhr = new XMLHttpRequest()
+        xhr.open(method, url)
 
-    tweetsElement.innerHTML = el1 + el2 + el3
+        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
+        xhr.onload = function() {
+            const serverResponse = xhr.response
+            console.log(xhr.status, serverResponse)
+            const tweetsEl = document.getElementById('tweets')
+            loadTweets(tweetsEl)
+        }
 
-    const xhr = new XMLHttpRequest()
-    const method = 'GET' // POST 
-    const url = "/tweets" // path to get the json jdata
-    const responseType = "json"
+        xhr.send(myFormData)
+            //console.log(endpoint,method)
+            // for (var myItem of myFormData.entries) {
+            //     console.log(myItem)
+            // 
 
+    }
+
+
+    const tweetCreateFormEl = document.getElementById("tweet-create-form")
+    tweetCreateFormEl.addEventListener("submit", handleTweetCreateFormDidSubmit)
+
+    const tweetsEl = document.getElementById('tweets')
+
+    function loadTweets(tweetsElement) {
+        const xhr = new XMLHttpRequest()
+        const method = 'GET' // POST 
+        const url = "/tweets" // path to get the json jdata
+        const responseType = "json"
+
+        xhr.responseType = responseType
+        xhr.open(method, url)
+        xhr.onload = function() {
+            const serverResponse = xhr.response
+            var listedItems = serverResponse.response
+                //console.log(listedItems)
+
+            var finalTweetStr = ""
+            var i;
+            for (i = 0; i < listedItems.length; i++) {
+                var tweetObj = listedItems[i]
+                var currentItem = formatTweetElement(tweetObj)
+                finalTweetStr += currentItem
+            }
+            tweetsElement.innerHTML = finalTweetStr
+        }
+        xhr.send()
+
+    }
+
+    loadTweets(tweetsEl)
 
     function handleDidLike(tweet_id, currentCount) {
         console.log(tweet_id, currentCount)
@@ -47,25 +106,6 @@
             "</p> <div class='btn-group'>" + LikeButton(tweet) + "</div></div>"
         return formattedText
     }
-
-
-    xhr.responseType = responseType
-    xhr.open(method, url)
-    xhr.onload = function() {
-        const serverResponse = xhr.response
-        var listedItems = serverResponse.response
-            //console.log(listedItems)
-
-        var finalTweetStr = ""
-        var i;
-        for (i = 0; i < listedItems.length; i++) {
-            var tweetObj = listedItems[i]
-            var currentItem = formatTweetElement(tweetObj)
-            finalTweetStr += currentItem
-        }
-        tweetsElement.innerHTML = finalTweetStr
-    }
-    xhr.send()
 </script>
 
 {% endblock content %}
