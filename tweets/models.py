@@ -8,6 +8,9 @@ class Tweet(models.Model):
 
     # TODO  -> More tweet features to add
 
+    class Meta:
+        ordering = ['-id']   # odering output with the latest tweet
+
     def serialize(self):
         return {
             "id" :self.id,
