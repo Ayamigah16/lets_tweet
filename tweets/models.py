@@ -1,3 +1,4 @@
+import random
 from django.db import models
 
 # Create your models here.
@@ -6,3 +7,10 @@ class Tweet(models.Model):
     image = models.FileField(upload_to='images/', blank=True, null=True)
 
     # TODO  -> More tweet features to add
+
+    def serialize(self):
+        return {
+            "id" :self.id,
+            "content" :self.content,
+            "likes": random.randint(0, 500)
+        }
