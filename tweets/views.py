@@ -4,10 +4,9 @@ from django.conf import settings
 from django.http import HttpRequest, HttpResponse, Http404, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render,redirect
 
-
-
 from .models import Tweet
 from .forms import TweetForm
+from .serializers import TweetSerializer
 
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
 
@@ -17,7 +16,15 @@ def home_view(request,*args, **kwargs):
     #return HttpResponse('<h1>Hello world</h1>')
     return render(request, "pages/home.html", context={}, status=200)    # render is used for templates
 
-def tweet_create_view(request : HttpRequest, *args, **kwargs):
+def tweet_create_view(request, *args, **kwargs):
+    serializer = TweetSerializer(data = request.POST or None)
+    if serializer.is_valid():
+        obj = serializer.save(user=request.user)
+        return JsonResponse(serializer.data, status=201)
+    return JsonResponse({},status=400)
+
+
+def tweet_create_view_pure_django(request : HttpRequest, *args, **kwargs):
     # VERIFYING IF AJAX
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
     
