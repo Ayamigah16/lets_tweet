@@ -4,6 +4,10 @@ from django.conf import settings
 from django.http import HttpRequest, HttpResponse, Http404, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render,redirect
 
+from rest_framework.decorators import api_view   #used to define function-based views as API endpoints
+from rest_framework.response import Response
+
+
 from .models import Tweet
 from .forms import TweetForm
 from .serializers import TweetSerializer
@@ -11,19 +15,39 @@ from .serializers import TweetSerializer
 ALLOWED_HOSTS = settings.ALLOWED_HOSTS
 
 # Create your views here.
+
+# DJANGO_REST_FRAMEWORK VIEWS(SERIALIZERS)
 def home_view(request,*args, **kwargs):
-    print(args, kwargs)
+    #print(args, kwargs)
     #return HttpResponse('<h1>Hello world</h1>')
     return render(request, "pages/home.html", context={}, status=200)    # render is used for templates
 
-def tweet_create_view(request, *args, **kwargs):
-    serializer = TweetSerializer(data = request.POST or None)
+@api_view(['POST'])  # client must send a POST request
+def tweets_create_view(request, *args, **kwargs):
+    serializer = TweetSerializer(data = request.POST)
     if serializer.is_valid():
-        obj = serializer.save(user=request.user)
-        return JsonResponse(serializer.data, status=201)
-    return JsonResponse({},status=400)
+        serializer.save(user=request.user)
+        return Response(serializer.data, status=201)
+    return Response({},status=400)
+
+@api_view(['GET'])
+def tweets_list_view(request,*args, **kwargs):
+    qs= Tweet.objects.all()
+    serializer = TweetSerializer(qs, many=True)   
+    return Response(serializer.data)
+
+@api_view(['GET'])
+def tweets_detail_view(request,tweet_id,*args, **kwargs):
+    qs= Tweet.objects.filter(id=tweet_id)
+    if not qs.exists():
+        return Response({},status=404)
+    obj = qs.first()
+    serializer = TweetSerializer(qs, many=True)   
+    return Response(serializer.data)
 
 
+
+# PURE DJANGO VIEWS
 def tweet_create_view_pure_django(request : HttpRequest, *args, **kwargs):
     # VERIFYING IF AJAX
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -54,9 +78,7 @@ def tweet_create_view_pure_django(request : HttpRequest, *args, **kwargs):
             return JsonResponse(form.errors, status=400)
     return render(request, "components/form.html", context={"form":form})
 
-
-
-def tweet_list(request, *args, **kwargs):
+def tweet_list_view_pure_django(request, *args, **kwargs):
     """ 
     REST API VIEW
     """
@@ -70,7 +92,7 @@ def tweet_list(request, *args, **kwargs):
     return JsonResponse(data)
 
 
-def tweets_detail_view(request, tweet_id, *args, **kwargs):
+def tweets_detail_view_pure_django(request, tweet_id, *args, **kwargs):
     """ 
     Coverting the dynamic view into REST View(Jason Format)
     """
