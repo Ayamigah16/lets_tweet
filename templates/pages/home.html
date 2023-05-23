@@ -91,9 +91,7 @@
             } else if (xhr.status === 401) {
                 alert("You must login!")
                 window.location.href = "/login" // directing usere to login page
-            }
-            /
-            else if (xhr.status === 403) {
+            } else if (xhr.status === 403) {
                 alert("You must login!")
                 window.location.href = "/login" // directing usere to login page
             }
@@ -143,7 +141,24 @@
 
     function handleDidLike(tweet_id, currentCount) {
         console.log(tweet_id, currentCount)
+            // handling like actions
+        const url = 'api/tweets/action'
+        const method = "POST"
+        const data = JSON.stringify({
+            id: tweet_id,
+            action: "likes",
+        })
+        const xhr = new XMLHttpRequest
+        xhr.open(method, url)
+        xhr.setRequestHeader("Content-Type", "application/json")
+        xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest")
+        xhr.onload = function() {
+            console.log(xhr.status, xhr.response)
+        }
+        xhr.send()
+        return
     }
+
 
     function LikeButton(tweet) {
         return "<button class='btn btn-primary' onclick=handleDidLike(" + tweet.id + "," + tweet.likes + ")>" + tweet.likes + " Likes</button>"

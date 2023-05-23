@@ -71,7 +71,7 @@ def tweets_action_view(request,*args, **kwargs):
     id is required
     ACTIONS --> like, unlike, retweet
     """  
-    serializer = TweetActionsSerializer(request.POST)
+    serializer = TweetActionsSerializer(data = request.POST)
     if serializer.is_valid(raise_exception=True):
         data = serializer.validated_data
         tweet_id = data.get("id")
@@ -90,6 +90,16 @@ def tweets_action_view(request,*args, **kwargs):
         # TODO
         pass
     return Response({"message":"Tweet removed "}, status=200)
+
+
+
+
+
+
+
+
+
+
 
 
 
