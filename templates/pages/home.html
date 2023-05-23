@@ -92,6 +92,11 @@
                 alert("You must login!")
                 window.location.href = "/login" // directing usere to login page
             }
+            /
+            else if (xhr.status === 403) {
+                alert("You must login!")
+                window.location.href = "/login" // directing usere to login page
+            }
             // handling server errors
             else if (xhr.status === 500) {
                 alert("There was a server error, please try again!")

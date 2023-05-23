@@ -4,7 +4,9 @@ from django.conf import settings
 from django.http import HttpRequest, HttpResponse, Http404, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render,redirect
 
-from rest_framework.decorators import api_view   #used to define function-based views as API endpoints
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes, authentication_classes  #used to define function-based views as API endpoints
 from rest_framework.response import Response
 
 
@@ -23,6 +25,8 @@ def home_view(request,*args, **kwargs):
     return render(request, "pages/home.html", context={}, status=200)    # render is used for templates
 
 @api_view(['POST'])  # client must send a POST request
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 def tweets_create_view(request, *args, **kwargs):
     serializer = TweetSerializer(data = request.POST)
     if serializer.is_valid():
