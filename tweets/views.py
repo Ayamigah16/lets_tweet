@@ -25,7 +25,7 @@ def home_view(request,*args, **kwargs):
     return render(request, "pages/home.html", context={}, status=200)    # render is used for templates
 
 @api_view(['POST'])  # client must send a POST request
-@authentication_classes([SessionAuthentication])
+# @authentication_classes([SessionAuthentication, MyCustomAuth])
 @permission_classes([IsAuthenticated])
 def tweets_create_view(request, *args, **kwargs):
     serializer = TweetSerializer(data = request.POST)
@@ -47,7 +47,21 @@ def tweets_detail_view(request,tweet_id,*args, **kwargs):
         return Response({},status=404)
     obj = qs.first()
     serializer = TweetSerializer(qs, many=True)   
-    return Response(serializer.data)
+    return Response(serializer.data, status=200)
+
+@api_view(['GET','POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def tweets_delete_view(request,tweet_id,*args, **kwargs):
+    qs = Tweet.objects.filter(id=tweet_id)
+    if not qs.exists():
+        return Response({},status=404)
+    qs = qs.filter(user=request.user)
+    if not qs.exists():
+        return Response({"message":"You cannot delete this tweet"},status = 401)
+    obj = qs.first()
+    obj.delete()
+    serializer = TweetSerializer(qs, many=True)   
+    return Response({"message":"Tweet removed "}, status=200)
 
 
 
