@@ -90,7 +90,10 @@
                 //console.log(contentErrorMessage)
             }
             // handling server errors
-            else if (xhr.status === 500) {
+            else if (xhr.status === 401) {
+                alert("You must login!")
+                window.location.href = "/login" // directing usere to login page
+            } else if (xhr.status === 500) {
                 alert("There was a server error")
             }
 
